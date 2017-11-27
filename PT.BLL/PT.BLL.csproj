@@ -74,8 +74,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccountRepository\MemberShipTools.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repository\Repository.cs" />
+    <Compile Include="Repository\RepositoryBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -90,6 +93,9 @@
       <Project>{52ef4622-1aa9-4b15-b1c1-50c1eb73c456}</Project>
       <Name>PT.Entities</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Settings\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
