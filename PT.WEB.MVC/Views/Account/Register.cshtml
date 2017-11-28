@@ -12,6 +12,7 @@
     <div class="col-md-offset-3 col-md-6">
         @using (Html.BeginForm("Register", "Account", FormMethod.Post))
         {
+            @Html.AntiForgeryToken()
             <div class="form-group">
                 @Html.LabelFor(x => x.Username)
                 @Html.TextBoxFor(x => x.Username, new { @class = " form-control", placeholder = "Kullanıcı Adı" })
@@ -37,8 +38,9 @@
                 @Html.TextBoxFor(x => x.ConfirmPassword, new { @class = "form-control", placeholder = "Şifre Tekrar", type = "password" })
             </div>
             <div class="col-sm-6">
-                @Html.ActionLink("Üye iseniz", "Login", "Account", new { @class = "btn btn-info btn-block" })
+               @Html.ActionLink("Giriş Yap", "Login", "Account", new { @class = "btn btn-info btn-block" })
             </div>
+            
             <div class="col-sm-6">
                 <input type="submit" value="Kayıt Ol" class="btn btn-block btn-success"/>
             </div>
