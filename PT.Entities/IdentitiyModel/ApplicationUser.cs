@@ -17,14 +17,14 @@ namespace PT.Entities.IdentitiyModel
 
         [StringLength(35)]
         public string Surname { get; set; }
-
-        [StringLength(35)]
+        
         public decimal Salary { get; set; }
 
         [Column(TypeName = "smalldatetime")]
         public DateTime RegiterDate { get; set; } = DateTime.Now;//kayıt olunan tarihi direk alır.AutoSetter.
 
-        public int DepertmentID { get; set; }
+        public int? DepertmentID { get; set; }
+
         [ForeignKey("DepertmentID")]
         public virtual Department Department { get; set; }
 
