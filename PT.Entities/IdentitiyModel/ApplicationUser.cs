@@ -23,6 +23,8 @@ namespace PT.Entities.IdentitiyModel
         [Column(TypeName = "smalldatetime")]
         public DateTime RegiterDate { get; set; } = DateTime.Now;//kayıt olunan tarihi direk alır.AutoSetter.
 
+        public string ActivationCode { get; set; }
+
         public int? DepertmentID { get; set; }
 
         [ForeignKey("DepertmentID")]
