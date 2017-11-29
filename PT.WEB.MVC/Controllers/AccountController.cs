@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNet.Identity;
+using Microsoft.Owin.Security;
 using PT.BLL.AccountRepository;
 using PT.BLL.Settings;
 using PT.Entities.IdentitiyModel;
@@ -32,7 +33,14 @@ namespace PT.WEB.MVC.Controllers
             var checkUser = userManager.FindByName(model.Username);
             if (checkUser != null)
             {
+                
                 ModelState.AddModelError(string.Empty, "Bu Kullanıcı Zaten Kayıtlı !");
+                return View(model);
+            }
+            checkUser = userManager.FindByEmail(model.Email);
+            if (checkUser != null)
+            {
+                ModelState.AddModelError(string.Empty, "Bu e-posta adresi kullanılmaktadır.");
                 return View(model);
             }
             //Register İşlemi Yapılır.
@@ -48,7 +56,7 @@ namespace PT.WEB.MVC.Controllers
             var response = userManager.Create(user, model.Password);//Passwordu hash etme işlemini Create methodunda yapar.
             if (response.Succeeded)//kayıt başarılı ise
             {
-                string siteUrl = Request.Url.Scheme + Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.IsDefaultPort ? "" : "" + Request.Url.Port);  
+                string siteUrl = Request.Url.Scheme + Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.IsDefaultPort ? "" : ":" + Request.Url.Port);
                 //scheme:Http/https SchemeDelimiter:// Url.Host www vs. IsDefaultPort:localhosttaki gibi port numarası varsa yaz yoksa boş bırak.
 
 
@@ -57,12 +65,13 @@ namespace PT.WEB.MVC.Controllers
                     userManager.AddToRole(user.Id, "Admin");
                     await SiteSettings.SendMail(new MailViewModel
                     {
-                        To=user.Email,
-                        Subject="Hoşgeldin Sahip",
-                        Message="Sitemizi yöneteceğin için çok mutluyuz. ^^"
+                        To = user.Email,
+                        Subject = "Hoşgeldin Sahip",
+                        Message = "Sitemizi yöneteceğin için çok mutluyuz. ^^"
                     }); //await kullanırsak methodun başına async yazılır ve method void olmalı  void değilse Task <geridönüştipi> yazılır.
                 }
-                else{
+                else
+                {
                     userManager.AddToRole(user.Id, "Passive");
                     await SiteSettings.SendMail(new MailViewModel
                     {
@@ -81,6 +90,98 @@ namespace PT.WEB.MVC.Controllers
                 ModelState.AddModelError(string.Empty, "Kayıt işleminde bir hata oluştu.");
                 return View(model);
             }
+        }
+        public ActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]//Güvenlik Testleri için Gerekli--Arkaplanda Session oluşturur ve kendi formumuzdaki sessions la eşleşiyormu diye kontrol eder.
+        public async Task<ActionResult> Login(LoginViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var userManager = MemberShipTools.NewUserManager();
+            var user = await userManager.FindAsync(model.Username, model.Password);
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Böyle bir kullanıcı bulunamadı.");
+                return View(model);
+            }
+            var authManager = HttpContext.GetOwinContext().Authentication;
+            var userIdentity = await userManager.CreateIdentityAsync(user, DefaultAuthenticationTypes.ApplicationCookie);
+            authManager.SignIn(new AuthenticationProperties
+            {
+                IsPersistent = model.RememberMe//eğer işaretliyse true dönecek.
+            }, userIdentity);
+            return RedirectToAction("Index", "Home");
+        }
+        [Authorize]//Sisteme Login olmadan Logout'u görememesi için
+        public ActionResult Logout()
+        {
+            var authManager = HttpContext.GetOwinContext().Authentication;
+            authManager.SignOut();
+            return RedirectToAction("Index", "Home");
+        }
+
+        public async Task<ActionResult> Activation(string code)
+        {
+            var userStore = MemberShipTools.NewUserStore();
+            var userManager = new UserManager<ApplicationUser>(userStore);
+            var sonuc = userStore.Context.Set<ApplicationUser>().FirstOrDefault(x => x.ActivationCode == code);
+            if (sonuc == null)
+            {
+                ViewBag.sonuc = "Aktivasyon işlemi Başarısız";
+                return View();
+            }
+            sonuc.EmailConfirmed = true;
+            await userStore.UpdateAsync(sonuc);
+            await userStore.Context.SaveChangesAsync();
+             userManager.RemoveFromRole(sonuc.Id, "Passive");
+             userManager.AddToRole(sonuc.Id, "User");
+            ViewBag.sonuc = $"Merhaba {sonuc.Name}{sonuc.Surname}<br/> Aktivasyon işleminiz başarılı.";
+            await SiteSettings.SendMail(new MailViewModel
+            {
+                To = sonuc.Email,
+                Message = ViewBag.sonuc.ToString(),
+                Subject = "Aktivasyon",
+                Bcc = "poyildirim@gmail.com"
+            });
+            return View();
+        }
+
+        public ActionResult RecoverPassword()
+        {
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task <ActionResult> RecoverPassword(string email)
+        {
+            var userStore = MemberShipTools.NewUserStore();
+            var userManager = new UserManager<ApplicationUser>(userStore);
+            var sonuc = userStore.Context.Set<ApplicationUser>().FirstOrDefault(x => x.Email == email);
+            if (sonuc == null)
+            {
+                ViewBag.sonuc = "E-mail adresiniz sisteme kayıtlı değil.";
+                return View();
+            }
+            var randomPass = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 6);
+            await userStore.SetPasswordHashAsync(sonuc, userManager.PasswordHasher.HashPassword(randomPass));
+            await userStore.UpdateAsync(sonuc);
+            await userStore.Context.SaveChangesAsync();
+            await SiteSettings.SendMail(new MailViewModel
+            {
+                To = sonuc.Email,
+                Subject = "Şifre Değişikliği ",
+                Message = $"Merhaba{sonuc.Name}{sonuc.Surname}<br/> Yeni Şifreniz: <b>{randomPass}</b> olarak değiştirilmiştir."
+                    
+            });
+            ViewBag.sonuc = "Email adresinize yeni şifre gönderilmiştir.";
+            return View();
         }
     }
 }
