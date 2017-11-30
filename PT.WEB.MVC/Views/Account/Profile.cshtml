@@ -1,35 +1,36 @@
 ﻿@using PT.Entities.ViewModel
-@model ProfileViewModel
+@model ProfilePasswordViewModel
 @{
-    ViewBag.Title = $"Profil Ekranı - {Model.Username}";
+    ViewBag.Title = $"Profil Ekranı - {Model.ProfileViewModel.Username}";
 }
 
-<h2>@Model.Name @Model.Surname</h2>
+<h2>@Model.ProfileViewModel.Name @Model.ProfileViewModel.Surname</h2>
 @Html.ValidationSummary()
 
 <div class="row">
     <div class=" col-md-6">
         @using (Html.BeginForm("Profile", "Account", FormMethod.Post))
         {
+            @Html.HiddenFor(x => x.ProfileViewModel.Id)
             @Html.Raw(ViewBag.sonuc)
             @Html.AntiForgeryToken()
             <div class="form-group">
-                @Html.LabelFor(x => x.Username )
-                @Html.TextBoxFor(x => x.Username, new { @class = "form-control" ,placeholder="Kullanıcı Adı",@readonly=true})
+                @Html.LabelFor(x => x.ProfileViewModel.Username )
+                @Html.TextBoxFor(x => x.ProfileViewModel.Username, new { @class = "form-control" ,placeholder="Kullanıcı Adı",@readonly=true})
             </div>
             <div class="form-group">
-                @Html.LabelFor(x => x.Name)
-                @Html.TextBoxFor(x => x.Name, new { @class = "form-control", placeholder = "Ad" })
+                @Html.LabelFor(x => x.ProfileViewModel.Name)
+                @Html.TextBoxFor(x => x.ProfileViewModel.Name, new { @class = "form-control", placeholder = "Ad" })
             </div>
             <div class="form-group">
-                @Html.LabelFor(x => x.Surname)
-                @Html.TextBoxFor(x => x.Surname, new { @class = "form-control", placeholder = "Soyad" })
+                @Html.LabelFor(x => x.ProfileViewModel.Surname)
+                @Html.TextBoxFor(x => x.ProfileViewModel.Surname, new { @class = "form-control", placeholder = "Soyad" })
             </div>
             <div class="form-group">
-                @Html.LabelFor(x => x.Email)
-                @Html.TextBoxFor(x => x.Email, new { @class = "form-control", placeholder = "E-mail" })
+                @Html.LabelFor(x => x.ProfileViewModel.Email)
+                @Html.TextBoxFor(x => x.ProfileViewModel.Email, new { @class = "form-control", placeholder = "E-mail" })
             </div>
-            @Html.HiddenFor(x => x.Id)
+           
             <div class="row">
                 <div class="col-sm-12">
                     <input type="submit" value="Profili Güncelle" class="btn btn-success btn-block" />
@@ -42,18 +43,18 @@
         {
             @Html.AntiForgeryToken()
             <div class="form-group">
-                @Html.LabelFor(x => x.OldPassword)
-                @Html.TextBoxFor(x => x.OldPassword, new { @class = "form-control",type="password", placeholder = "Eski Şifre" })
+                @Html.LabelFor(x => x.PasswordViewModel.OldPassword)
+                @Html.TextBoxFor(x => x.PasswordViewModel.OldPassword, new { @class = "form-control",type="password", placeholder = "Eski Şifre" })
             </div>
             <div class="form-group">
-                @Html.LabelFor(x => x.NewPassword)
-                @Html.TextBoxFor(x => x.NewPassword, new { @class = "form-control", type = "password", placeholder = "Yeni Şifre" })
+                @Html.LabelFor(x => x.PasswordViewModel.NewPassword)
+                @Html.TextBoxFor(x => x.PasswordViewModel.NewPassword, new { @class = "form-control", type = "password", placeholder = "Yeni Şifre" })
             </div>
             <div class="form-group">
-                @Html.LabelFor(x => x.NewPasswordConfirm)
-                @Html.TextBoxFor(x => x.NewPasswordConfirm, new { @class = "form-control", type = "password", placeholder = "Yeni Şifre Tekrar" })
+                @Html.LabelFor(x => x.PasswordViewModel.NewPasswordConfirm)
+                @Html.TextBoxFor(x => x.PasswordViewModel.NewPasswordConfirm, new { @class = "form-control", type = "password", placeholder = "Yeni Şifre Tekrar" })
             </div>
-            @Html.HiddenFor(x => x.Id)
+            @Html.HiddenFor(x => x.ProfileViewModel.Id)
             <div class="row">
                 <div class="col-sm-12">
                     <input type="submit" value="Şifre Güncelle" class="btn btn-primary btn-block" />
