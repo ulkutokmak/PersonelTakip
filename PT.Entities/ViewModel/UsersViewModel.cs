@@ -17,5 +17,6 @@ namespace PT.Entities.ViewModel
         public string RoleId { get; set; }
         public decimal Salary { get; set; }
         public DateTime RegisterDate { get; set; }
+
     }
 }

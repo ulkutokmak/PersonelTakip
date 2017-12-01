@@ -37,7 +37,7 @@
                     @Html.LabelFor(x => x.ConfirmPassword)
                     @Html.TextBoxFor(x => x.ConfirmPassword, new { @class = "form-control", placeholder = "Şifre Tekrar", type = "password" })
                 </div>
-                <div row>
+                <div class="row">
                     <div class="col-sm-12">
                         @Html.ActionLink("Üye İseniz", "Login", "Account", new { @class = "btn btn-info btn-block" })
                         <input type="submit" value="Kayıt Ol" class="btn btn-block btn-success" />
